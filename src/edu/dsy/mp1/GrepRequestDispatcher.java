@@ -2,21 +2,35 @@ package edu.dsy.mp1;
 //Grep Dispatcher 
 import java.io.*;
 import java.net.*;
+import java.util.Properties;
 public class GrepRequestDispatcher{
 	Socket requestSocket;
 	ObjectOutputStream out;
 	ObjectInputStream in;
 	String message;
 	GrepInputParameters inputParams;
-	GrepRequestDispatcher(){}
 	GrepRequestDispatcher(String pattern,String file){
 		inputParams =new GrepInputParameters(pattern,file);
 	}
 	public void run()
-	{
+	{ 
+		
+		Properties prop =new Properties();
 		try{
+		prop.load(new FileInputStream("config.properties"));
+		}catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+		for(int i=1;i<=prop.size()/2;i++)
+		{ 
+	
+		   
+		
+			try{
 			//1. creating a socket to connect to the server
-			requestSocket = new Socket("localhost", 2060);
+			requestSocket = new Socket(prop.getProperty("server_"+i),Integer.parseInt(prop.getProperty("port_"+i)));
+			
 			
 			//2. get Input and Output streams
 			out = new ObjectOutputStream(requestSocket.getOutputStream());
@@ -52,7 +66,7 @@ public class GrepRequestDispatcher{
 			catch(IOException ioException){
 				ioException.printStackTrace();
 			}
-		}
+		}}
 	}
 	public void sendMessage(GrepInputParameters params)
 	{
