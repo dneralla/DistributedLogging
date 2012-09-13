@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.io.*;
 
 public class GrepListener {
 	ServerSocket sSocket;
@@ -23,7 +24,7 @@ public class GrepListener {
 	try{
 		//1. creating a server socket
 	
-	      sSocket = new ServerSocket(200);
+	      sSocket = new ServerSocket(2060);
 		//2. Wait for connection
 		  connection = sSocket.accept();
 		System.out.println("Connection received from " + connection.getInetAddress().getHostName());
@@ -35,10 +36,16 @@ public class GrepListener {
 		//4. The two parts communicate via the input and output streams
 		
 			try{
+				
 				input = (GrepInputParameters)in.readObject();
-				Process p = Runtime.getRuntime().exec("grep"+" "+input.getPattern()+""+input.getFile());
-				sendMessage(p.getOutputStream().toString()); 
-					
+				System.out.println(input.getFile());
+				Process p = Runtime.getRuntime().exec("grep"+" "+input.getFile()+" "+input.getPattern());
+				BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+				
+			       sendMessage(stdInput.readLine());
+
+	
 			}
 			catch(ClassNotFoundException classnot){
 				System.err.println("Data received in unknown format");
@@ -74,7 +81,14 @@ public class GrepListener {
 		ioException.printStackTrace();
 	 }
       }
-
+     public static void main(String args[])
+ 	{
+    	System.out.println("hello");
+ 		GrepListener server = new GrepListener();
+ 		while(true){
+ 			server.run();
+ 		}
+ 	}
 
 
 
