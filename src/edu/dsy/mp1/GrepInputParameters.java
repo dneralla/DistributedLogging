@@ -1,7 +1,9 @@
 package edu.dsy.mp1;
-
+/*
+ * Class for managing Grep parameters
+ */
 public class GrepInputParameters implements java.io.Serializable{
-	
+
 	private String pattern;
 	private String file;
 	public GrepInputParameters(String file,String pattern)
@@ -21,6 +23,6 @@ public class GrepInputParameters implements java.io.Serializable{
 	public void setFile(String file) {
 		this.file = file;
 	}
-	
+
 
 }
