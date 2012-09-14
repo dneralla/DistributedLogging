@@ -1,0 +1,10 @@
+<servers>
+ <server>
+  <name>localhost</name>
+  <port>2060
+  </port>
+ <server>
+  <name>localhost</name>
+  <port>2060
+  </port>
+</servers>
