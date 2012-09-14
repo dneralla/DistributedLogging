@@ -6,6 +6,7 @@ public class GrepInputParameters implements java.io.Serializable{
 
 	private String pattern;
 	private String file;
+
 	public GrepInputParameters(String file,String pattern)
 	{
 		this.file=file;
@@ -23,6 +24,4 @@ public class GrepInputParameters implements java.io.Serializable{
 	public void setFile(String file) {
 		this.file = file;
 	}
-
-
 }
