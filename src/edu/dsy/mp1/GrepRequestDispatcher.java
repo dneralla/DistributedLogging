@@ -1,12 +1,20 @@
 package edu.dsy.mp1;
 
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Properties;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 //Grep Dispatcher
 
 public class GrepRequestDispatcher{
@@ -15,46 +23,58 @@ public class GrepRequestDispatcher{
 	ObjectInputStream in;
 	String message;
 	GrepInputParameters inputParams;
+
+	DocumentBuilderFactory dbFactory;
+	DocumentBuilder dBuilder;
+	Document doc;
+	NodeList nList;
 	GrepRequestDispatcher(String pattern,String file){
 		inputParams =new GrepInputParameters(pattern,file);
 	}
+
+	private static String getTagValue(String sTag, Element eElement) {
+		NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
+        Node nValue = nlList.item(0);
+		return nValue.getNodeValue();
+	}
+
 	public void run()
 	{
-
-		Properties prop =new Properties();
+		File propertiesXML = new File("config.xml");
 		try{
-		prop.load(new FileInputStream("config.properties"));
-		}catch(IOException e)
+			dbFactory = DocumentBuilderFactory.newInstance();
+			dBuilder = dbFactory.newDocumentBuilder();
+			doc = dBuilder.parse(propertiesXML);
+			doc.getDocumentElement().normalize();
+			nList = doc.getElementsByTagName("server");
+		    //prop.load(new FileInputStream("config.properties"));
+		}catch(Exception e)
 		{
 			e.printStackTrace();
 		}
-		for(int i=1;i<=prop.size()/2;i++)
-		{
+		for(int i=0; i < nList.getLength(); i++) {
+			try {
+				Element serverConfig = (Element) nList.item(i);
+				String hostName = getTagValue("name", serverConfig);
+				String hostPort = getTagValue("port", serverConfig);
+				// 1. creating a socket to connect to the server
+				requestSocket = new Socket(hostName,
+						Integer.parseInt(hostPort));
 
-
-
-			try{
-			//1. creating a socket to connect to the server
-
-			requestSocket = new Socket(prop.getProperty("server_"+i),Integer.parseInt(prop.getProperty("port_"+i)));
-
-			//2. get Input and Output streams
-			out = new ObjectOutputStream(requestSocket.getOutputStream());
-			out.flush();
-			in = new ObjectInputStream(requestSocket.getInputStream());
-			//3: Communicating with the server
-
-				try{
-					//message = (String)in.readObject();
-					//System.out.println("server>" + message);
+				// 2. get Input and Output streams
+				out = new ObjectOutputStream(requestSocket.getOutputStream());
+				out.flush();
+				in = new ObjectInputStream(requestSocket.getInputStream());
+				// 3: Communicating with the server
+				try {
+					// message = (String)in.readObject();
+					// System.out.println("server>" + message);
 					sendMessage(inputParams);
-					message = (String)in.readObject();
+					message = (String) in.readObject();
 					System.out.println("server>" + message);
-				}
-				catch(ClassNotFoundException classNot){
+				} catch (ClassNotFoundException classNot) {
 					System.err.println("data received in unknown format");
 				}
-
 		}
 		catch(UnknownHostException unknownHost){
 			System.err.println("You are trying to connect to an unknown host!");
