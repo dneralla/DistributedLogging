@@ -1,7 +1,11 @@
 package edu.dsy.mp1;
-//Grep Dispatcher 
-import java.io.*;
-import java.net.*;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
 public class GrepRequestDispatcher{
 	Socket requestSocket;
 	ObjectOutputStream out;
@@ -17,13 +21,13 @@ public class GrepRequestDispatcher{
 		try{
 			//1. creating a socket to connect to the server
 			requestSocket = new Socket("localhost", 2060);
-			
+
 			//2. get Input and Output streams
 			out = new ObjectOutputStream(requestSocket.getOutputStream());
 			out.flush();
 			in = new ObjectInputStream(requestSocket.getInputStream());
 			//3: Communicating with the server
-			
+
 				try{
 					//message = (String)in.readObject();
 					//System.out.println("server>" + message);
@@ -34,7 +38,7 @@ public class GrepRequestDispatcher{
 				catch(ClassNotFoundException classNot){
 					System.err.println("data received in unknown format");
 				}
-			
+
 		}
 		catch(UnknownHostException unknownHost){
 			System.err.println("You are trying to connect to an unknown host!");
@@ -54,17 +58,18 @@ public class GrepRequestDispatcher{
 			}
 		}
 	}
+
 	public void sendMessage(GrepInputParameters params)
 	{
 		try{
 			out.writeObject(params);
 			out.flush();
-		
 		}
 		catch(IOException ioException){
 			ioException.printStackTrace();
 		}
 	}
+
 	public static void main(String args[])
 	{
 		GrepRequestDispatcher dispatcher= new GrepRequestDispatcher(args[0],args[1]);
