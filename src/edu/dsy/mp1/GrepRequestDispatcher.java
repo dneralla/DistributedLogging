@@ -28,8 +28,9 @@ public class GrepRequestDispatcher{
 	DocumentBuilder dBuilder;
 	Document doc;
 	NodeList nList;
-	GrepRequestDispatcher(String pattern,String file){
-		inputParams =new GrepInputParameters(pattern,file);
+
+	GrepRequestDispatcher(String regex, String filePattern){
+		inputParams = new GrepInputParameters(regex, filePattern);
 	}
 
 	private static String getTagValue(String sTag, Element eElement) {
@@ -38,28 +39,26 @@ public class GrepRequestDispatcher{
 		return nValue.getNodeValue();
 	}
 
-	public void run()
-	{
+	public void run() {
 		File propertiesXML = new File("config.xml");
-		try{
+		try {
 			dbFactory = DocumentBuilderFactory.newInstance();
 			dBuilder = dbFactory.newDocumentBuilder();
 			doc = dBuilder.parse(propertiesXML);
 			doc.getDocumentElement().normalize();
 			nList = doc.getElementsByTagName("server");
-		    //prop.load(new FileInputStream("config.properties"));
-		}catch(Exception e)
-		{
+			// prop.load(new FileInputStream("config.properties"));
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		for(int i=0; i < nList.getLength(); i++) {
+		for (int i = 0; i < nList.getLength(); i++) {
 			try {
 				Element serverConfig = (Element) nList.item(i);
 				String hostName = getTagValue("name", serverConfig);
 				String hostPort = getTagValue("port", serverConfig);
+
 				// 1. creating a socket to connect to the server
-				requestSocket = new Socket(hostName,
-						Integer.parseInt(hostPort));
+				requestSocket = new Socket(hostName, Integer.parseInt(hostPort));
 
 				// 2. get Input and Output streams
 				out = new ObjectOutputStream(requestSocket.getOutputStream());
@@ -75,24 +74,22 @@ public class GrepRequestDispatcher{
 				} catch (ClassNotFoundException classNot) {
 					System.err.println("data received in unknown format");
 				}
-		}
-		catch(UnknownHostException unknownHost){
-			System.err.println("You are trying to connect to an unknown host!");
-		}
-		catch(IOException ioException){
-			ioException.printStackTrace();
-		}
-		finally{
-			//4: Closing connection
-			try{
-				in.close();
-				out.close();
-				requestSocket.close();
-			}
-			catch(IOException ioException){
+			} catch (UnknownHostException unknownHost) {
+				System.err
+						.println("You are trying to connect to an unknown host!");
+			} catch (IOException ioException) {
 				ioException.printStackTrace();
+			} finally {
+				// 4: Closing connection
+				try {
+					in.close();
+					out.close();
+					requestSocket.close();
+				} catch (IOException ioException) {
+					ioException.printStackTrace();
+				}
 			}
-		}}
+		}
 	}
 
 	public void sendMessage(GrepInputParameters params)
