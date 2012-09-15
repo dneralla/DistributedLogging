@@ -5,12 +5,8 @@ package edu.dsy.mp1;
 
 public class LogRequestDispatcher extends RequestDispatcher {
 
-	LogRequestDispatcher(String fileName, String fileContent) {
+	LogRequestDispatcher(String fileName, String fileContent, String configFileName) {
 		setInputParameters(new LogParameters(fileName, fileContent));
-	}
-
-	@Override
-	public InputParameters getInputParameters() {
-		return inputParams;
+		setConfigFileName(configFileName);
 	}
 }

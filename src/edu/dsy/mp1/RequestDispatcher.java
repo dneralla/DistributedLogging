@@ -28,6 +28,15 @@ public abstract class RequestDispatcher{
 	DocumentBuilder dBuilder;
 	Document doc;
 	NodeList nList;
+	String configFileName;
+
+	public String getConfigFileName() {
+		return configFileName;
+	}
+
+	public void setConfigFileName(String configFileName) {
+		this.configFileName = configFileName;
+	}
 
 	private static String getTagValue(String sTag, Element eElement) {
 		NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
@@ -36,7 +45,7 @@ public abstract class RequestDispatcher{
 	}
 
 	public void run() {
-		File propertiesXML = new File("config.xml");
+		File propertiesXML = new File(configFileName);
 		try {
 			dbFactory = DocumentBuilderFactory.newInstance();
 			dBuilder = dbFactory.newDocumentBuilder();
@@ -64,7 +73,7 @@ public abstract class RequestDispatcher{
 				try {
 					// message = (String)in.readObject();
 					// System.out.println("server>" + message);
-				    sendMessage(getInputParameters());
+				    sendMessage(inputParams);
 					message = (String) in.readObject();
 					System.out.println("server>" + message);
 				} catch (ClassNotFoundException classNot) {
