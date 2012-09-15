@@ -1,20 +1,11 @@
 package edu.dsy.mp1;
 
-public class LogParameters {
+public class LogParameters extends InputParameters {
+	private String fileContent;
+
 	public LogParameters(String fileName, String fileContent) {
-		super();
-		this.fileName = fileName;
+		super(fileName);
 		this.fileContent = fileContent;
-	}
-
-	private String fileName, fileContent;
-
-	public String getFileName() {
-		return fileName;
-	}
-
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
 	}
 
 	public String getFileContent() {
