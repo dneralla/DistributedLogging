@@ -1,12 +1,24 @@
 package edu.dsy.mp1;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+
+
 
 public class GrepListener {
 	ServerSocket sSocket;
@@ -14,6 +26,11 @@ public class GrepListener {
 	ObjectOutputStream out;
 	ObjectInputStream in;
 	GrepInputParameters input;
+	
+	DocumentBuilderFactory dbFactory;
+	DocumentBuilder dBuilder;
+	Document doc;
+	NodeList nList;
 
 	public GrepListener() {}
 	/**
@@ -22,8 +39,30 @@ public class GrepListener {
     public void run()
     {
 
-	try{
-	    sSocket = new ServerSocket(2060);
+	
+		int port=0;
+		File propertiesXML = new File("src/edu/dsy/mp1/config.xml");
+		try {
+			
+			dbFactory = DocumentBuilderFactory.newInstance();
+			dBuilder = dbFactory.newDocumentBuilder();
+			doc = dBuilder.parse(propertiesXML);
+			doc.getDocumentElement().normalize();
+			
+			XPathFactory factory = XPathFactory.newInstance();
+			XPath xpath = factory.newXPath();
+		    XPathExpression expr = xpath.compile("//servers/server[name='"+InetAddress.getLocalHost().getHostName()+"']/port/text()");
+			
+			Object result = expr.evaluate(doc, XPathConstants.NODE);
+			Node n =(Node)result;
+			port=Integer.parseInt(n.getNodeValue());
+		    } catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	  while(true){  
+		try{
+	    sSocket = new ServerSocket(port);
 		connection = sSocket.accept();
 		System.out.println("Connection received from " + connection.getInetAddress().getHostName());
 		out = new ObjectOutputStream(connection.getOutputStream());
@@ -44,7 +83,7 @@ public class GrepListener {
 	}catch(IOException ioException){
 			ioException.printStackTrace();
 		}
-	}
+	}}
 
  /**
   *
@@ -67,9 +106,11 @@ public class GrepListener {
  */
    public void doGrep(GrepInputParameters input) throws IOException
    {
-        Process p = Runtime.getRuntime().exec("grep"+" "+input.getFile()+" "+input.getPattern());
+	    System.out.println(input.getPattern());
+	    System.out.println(input.getFile());
+        Process p = Runtime.getRuntime().exec("grep"+" "+input.getPattern()+" "+input.getFile()+ " "+input.getOptionalParams() );
 		BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
-		String buffer,result=null;
+		String buffer,result="";
 		while ((buffer = stdInput.readLine()) != null) {
 		result = result + buffer;
 		}
@@ -85,8 +126,8 @@ public class GrepListener {
  	{
     	System.out.println("hello");
  		GrepListener server = new GrepListener();
- 		while(true){
+ 		
  			server.run();
- 		}
+ 		
  	}
 }
