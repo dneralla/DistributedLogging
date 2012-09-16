@@ -11,7 +11,10 @@ public class LogServer extends ServerListener{
 	static private SimpleFormatter formatterTxt;
 
 	public LogServer() {
-		super();
+		super("test/edu/dsy/mp1/config.xml");
+	}
+	public LogServer(String fileXML) {
+		super(fileXML);
 	}
 
 	public void doAction(LogParameters input) throws IOException {
@@ -19,7 +22,7 @@ public class LogServer extends ServerListener{
 		// Create Logger
 	    Logger logger = Logger.getLogger(LogServer.class.getName());
 	    logger.setLevel(Level.INFO);
-	    fileTxt = new FileHandler("Logging.txt");
+	    fileTxt = new FileHandler(input.getFileName());
 
 	    // Create txt Formatter
 	    formatterTxt = new SimpleFormatter();

@@ -30,6 +30,10 @@ public abstract class RequestDispatcher{
 	NodeList nList;
 	String configFileName;
 
+	public RequestDispatcher(InputParameters inputParams, String configFileName) {
+		this.inputParams = inputParams;
+		this.configFileName = configFileName;
+	}
 	public String getConfigFileName() {
 		return configFileName;
 	}
