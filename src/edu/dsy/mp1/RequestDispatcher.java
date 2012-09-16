@@ -1,8 +1,6 @@
 package edu.dsy.mp1;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -17,39 +15,32 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-//Grep Dispatcher
+//Generic Request Dispatcher
 
-public class GrepRequestDispatcher{
+public abstract class RequestDispatcher{
 	Socket requestSocket;
 	ObjectOutputStream out;
 	ObjectInputStream in;
 	String message;
-	GrepInputParameters inputParams;
-	boolean writeOutputToFile;
-	String outputFile;
+	InputParameters inputParams;
 
 	DocumentBuilderFactory dbFactory;
 	DocumentBuilder dBuilder;
 	Document doc;
 	NodeList nList;
+	String configFileName;
 
-	public GrepRequestDispatcher(String regex, String filePattern)
-	{
-		inputParams = new GrepInputParameters(regex, filePattern);
+	public RequestDispatcher(InputParameters inputParams, String configFileName) {
+		this.inputParams = inputParams;
+		this.configFileName = configFileName;
+	}
+	public String getConfigFileName() {
+		return configFileName;
 	}
 
-	public GrepRequestDispatcher(String regex, String filePattern,String optionalParams)
-	{
-		inputParams = new GrepInputParameters(regex, filePattern,optionalParams);
+	public void setConfigFileName(String configFileName) {
+		this.configFileName = configFileName;
 	}
-	
-	public GrepRequestDispatcher(String regex, String filePattern,boolean outputToFile,String outputFile)
-	{
-		inputParams = new GrepInputParameters(regex, filePattern);
-		this.writeOutputToFile=outputToFile;
-		this.outputFile=outputFile;
-	}
-
 
 	private static String getTagValue(String sTag, Element eElement) {
 		NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
@@ -58,7 +49,7 @@ public class GrepRequestDispatcher{
 	}
 
 	public void run() {
-		File propertiesXML = new File("src/edu/dsy/mp1/config.xml");
+		File propertiesXML = new File(configFileName);
 		try {
 			dbFactory = DocumentBuilderFactory.newInstance();
 			dBuilder = dbFactory.newDocumentBuilder();
@@ -86,25 +77,9 @@ public class GrepRequestDispatcher{
 				try {
 					// message = (String)in.readObject();
 					// System.out.println("server>" + message);
-					sendMessage(inputParams);
-					
+				    sendMessage(inputParams);
 					message = (String) in.readObject();
-					if(!this.writeOutputToFile)
-					{ System.out.println(message); }
-					else
-					{
-						try{
-							  // Create file 
-							  FileWriter fstream = new FileWriter(this.outputFile);
-							  BufferedWriter out = new BufferedWriter(fstream);
-							  out.write("Hello Java");
-							  //Close the output stream
-							  out.close();
-							  }catch (Exception e){//Catch exception if any
-							  System.err.println("Error: " + e.getMessage());
-							  }
-					}
-					
+					System.out.println("server>" + message);
 				} catch (ClassNotFoundException classNot) {
 					System.err.println("data received in unknown format");
 				}
@@ -126,7 +101,7 @@ public class GrepRequestDispatcher{
 		}
 	}
 
-	public void sendMessage(GrepInputParameters params)
+	public void sendMessage(InputParameters params)
 	{
 		try{
 			out.writeObject(params);
@@ -137,9 +112,11 @@ public class GrepRequestDispatcher{
 		}
 	}
 
-	public static void main(String args[])
-	{
-		GrepRequestDispatcher dispatcher= new GrepRequestDispatcher(args[0],args[1]);
-		dispatcher.run();
+	public void setInputParameters(InputParameters inputParams) {
+		this.inputParams = inputParams;
+	}
+
+	public InputParameters getInputParameters() {
+		return inputParams;
 	}
 }

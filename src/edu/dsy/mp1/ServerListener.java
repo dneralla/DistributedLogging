@@ -1,9 +1,7 @@
 package edu.dsy.mp1;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
@@ -21,31 +19,35 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-
-
-
-public class GrepListener {
+public abstract class ServerListener {
 	ServerSocket sSocket;
 	Socket connection = null;
 	ObjectOutputStream out;
 	ObjectInputStream in;
-	GrepInputParameters input;
+	InputParameters input;
 
 	DocumentBuilderFactory dbFactory;
 	DocumentBuilder dBuilder;
 	Document doc;
 	NodeList nList;
+    String fileXML;
 
-	public GrepListener() {}
+	public ServerListener(String fileXML) {
+		this.fileXML = fileXML;
+	}
+
 	/**
 	 *
 	 */
-    public void run()
-    {
+	/**
+	 *
+	 */
+   public void run()
+   {
 
 
 		int port=0;
-		File propertiesXML = new File("src/edu/dsy/mp1/config.xml");
+		File propertiesXML = new File(fileXML);
 		try {
 
 			dbFactory = DocumentBuilderFactory.newInstance();
@@ -73,8 +75,8 @@ public class GrepListener {
 		out.flush();
 		in = new ObjectInputStream(connection.getInputStream());
 		try{
-			  input = (GrepInputParameters)in.readObject();
-			  doGrep(input);
+			  input = (InputParameters)in.readObject();
+			  doAction(input);
 			}
 	    catch(ClassNotFoundException e){
 		    e.printStackTrace();
@@ -89,49 +91,21 @@ public class GrepListener {
 		}
 	}}
 
- /**
-  *
-  * @param msg
-  */
-     public void sendMessage(String msg)
-     {
-	  try{
-		out.writeObject(msg);
-		out.flush();
-	    }
-	  catch(IOException ioException){
-		ioException.printStackTrace();
-	    }
-      }
-/**
- *
- * @param input
- * @throws IOException
- */
-   public void doGrep(GrepInputParameters input) throws IOException
-   {
-	    System.out.println(input.getPattern());
-	    System.out.println(input.getFile());
-        Process p = Runtime.getRuntime().exec("grep"+" "+input.getPattern()+" "+input.getFile()+ " "+input.getOptionalParams() );
-		BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
-		String buffer,result="";
-		while ((buffer = stdInput.readLine()) != null) {
-		result = result + buffer;
+
+	/**
+	 *
+	 * @param msg
+	 */
+	public void sendMessage(String msg) {
+		try {
+			out.writeObject(msg);
+			out.flush();
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
 		}
-		sendMessage(result);
+	}
 
-   }
-
-  /**
-   *
-   * @param args
-   */
-  public static void main(String args[])
- 	{
-    	System.out.println("hello");
- 		GrepListener server = new GrepListener();
-
- 			server.run();
-
- 	}
+	public void doAction(InputParameters input) throws IOException {
+		return;
+	}
 }

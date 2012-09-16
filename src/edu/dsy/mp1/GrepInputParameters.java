@@ -7,13 +7,13 @@ public class GrepInputParameters implements java.io.Serializable{
 	private String pattern;
 	private String file;
 	private String optionalParams;
-	
+
 	public GrepInputParameters(String pattern,String file)
 	{
 		this.file=file;
 		this.pattern=pattern;
 	}
-	
+
 	public GrepInputParameters(String pattern,String file,String optionalParams)
 	{
 		this.file=file;
