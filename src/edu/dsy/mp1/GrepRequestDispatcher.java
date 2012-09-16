@@ -17,7 +17,7 @@ import org.w3c.dom.NodeList;
 
 //Grep Dispatcher
 
-public class GrepRequestDispatcher{
+public class GrepRequestDispatcher {
 	Socket requestSocket;
 	ObjectOutputStream out;
 	ObjectInputStream in;
@@ -29,18 +29,25 @@ public class GrepRequestDispatcher{
 	Document doc;
 	NodeList nList;
 
-	GrepRequestDispatcher(String regex, String filePattern){
+	public GrepRequestDispatcher(String regex, String filePattern) {
 		inputParams = new GrepInputParameters(regex, filePattern);
 	}
 
+	public GrepRequestDispatcher(String regex, String filePattern,
+			String optionalParams) {
+		inputParams = new GrepInputParameters(regex, filePattern,
+				optionalParams);
+	}
+
 	private static String getTagValue(String sTag, Element eElement) {
-		NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
-        Node nValue = nlList.item(0);
+		NodeList nlList = eElement.getElementsByTagName(sTag).item(0)
+				.getChildNodes();
+		Node nValue = nlList.item(0);
 		return nValue.getNodeValue();
 	}
 
 	public void run() {
-		File propertiesXML = new File("config.xml");
+		File propertiesXML = new File("src/edu/dsy/mp1/config.xml");
 		try {
 			dbFactory = DocumentBuilderFactory.newInstance();
 			dBuilder = dbFactory.newDocumentBuilder();
@@ -70,7 +77,7 @@ public class GrepRequestDispatcher{
 					// System.out.println("server>" + message);
 					sendMessage(inputParams);
 					message = (String) in.readObject();
-					System.out.println("server>" + message);
+					System.out.println(message);
 				} catch (ClassNotFoundException classNot) {
 					System.err.println("data received in unknown format");
 				}
@@ -92,20 +99,18 @@ public class GrepRequestDispatcher{
 		}
 	}
 
-	public void sendMessage(GrepInputParameters params)
-	{
-		try{
+	public void sendMessage(GrepInputParameters params) {
+		try {
 			out.writeObject(params);
 			out.flush();
-		}
-		catch(IOException ioException){
+		} catch (IOException ioException) {
 			ioException.printStackTrace();
 		}
 	}
 
-	public static void main(String args[])
-	{
-		GrepRequestDispatcher dispatcher= new GrepRequestDispatcher(args[0],args[1]);
+	public static void main(String args[]) {
+		GrepRequestDispatcher dispatcher = new GrepRequestDispatcher(args[0],
+				args[1]);
 		dispatcher.run();
 	}
 }
