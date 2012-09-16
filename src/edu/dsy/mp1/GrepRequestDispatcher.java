@@ -19,42 +19,41 @@ import org.w3c.dom.NodeList;
 
 //Grep Dispatcher
 
-public class GrepRequestDispatcher {
+public class GrepRequestDispatcher{
 	Socket requestSocket;
 	ObjectOutputStream out;
 	ObjectInputStream in;
 	String message;
 	GrepInputParameters inputParams;
+	boolean writeOutputToFile;
+	String outputFile;
 
 	DocumentBuilderFactory dbFactory;
 	DocumentBuilder dBuilder;
 	Document doc;
 	NodeList nList;
 
-	String outputFileName;
-
-	public String getOutputFileName() {
-		return outputFileName;
-	}
-
-	public void setOutputFileName(String outputFileName) {
-		this.outputFileName = outputFileName;
-	}
-
-	public GrepRequestDispatcher(String regex, String filePattern) {
+	public GrepRequestDispatcher(String regex, String filePattern)
+	{
 		inputParams = new GrepInputParameters(regex, filePattern);
 	}
 
-	public GrepRequestDispatcher(String regex, String filePattern,
-			String optionalParams) {
-		inputParams = new GrepInputParameters(regex, filePattern,
-				optionalParams);
+	public GrepRequestDispatcher(String regex, String filePattern,String optionalParams)
+	{
+		inputParams = new GrepInputParameters(regex, filePattern,optionalParams);
 	}
 
+	public GrepRequestDispatcher(String regex, String filePattern,boolean outputToFile,String outputFile)
+	{
+		inputParams = new GrepInputParameters(regex, filePattern);
+		this.writeOutputToFile=outputToFile;
+		this.outputFile=outputFile;
+	}
+
+
 	private static String getTagValue(String sTag, Element eElement) {
-		NodeList nlList = eElement.getElementsByTagName(sTag).item(0)
-				.getChildNodes();
-		Node nValue = nlList.item(0);
+		NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
+        Node nValue = nlList.item(0);
 		return nValue.getNodeValue();
 	}
 
@@ -69,16 +68,6 @@ public class GrepRequestDispatcher {
 			// prop.load(new FileInputStream("config.properties"));
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		File file = new File(this.getOutputFileName());
-
-		// if file doesn't exists, then create it
-		if (!file.exists()) {
-			try {
-				file.createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
 		for (int i = 0; i < nList.getLength(); i++) {
 			try {
@@ -98,10 +87,24 @@ public class GrepRequestDispatcher {
 					// message = (String)in.readObject();
 					// System.out.println("server>" + message);
 					sendMessage(inputParams);
+
 					message = (String) in.readObject();
-					appendToFile(i, message);
-					System.out.println(message);
-					// append to single output file
+					if(!this.writeOutputToFile)
+					{ System.out.println(message); }
+					else
+					{
+						try{
+							  // Create file
+							  FileWriter fstream = new FileWriter(this.outputFile);
+							  BufferedWriter out = new BufferedWriter(fstream);
+							  out.write("Hello Java");
+							  //Close the output stream
+							  out.close();
+							  }catch (Exception e){//Catch exception if any
+							  System.err.println("Error: " + e.getMessage());
+							  }
+					}
+
 				} catch (ClassNotFoundException classNot) {
 					System.err.println("data received in unknown format");
 				}
@@ -123,31 +126,20 @@ public class GrepRequestDispatcher {
 		}
 	}
 
-	public void sendMessage(GrepInputParameters params) {
-		try {
+	public void sendMessage(GrepInputParameters params)
+	{
+		try{
 			out.writeObject(params);
 			out.flush();
-		} catch (IOException ioException) {
+		}
+		catch(IOException ioException){
 			ioException.printStackTrace();
 		}
 	}
 
-	public void appendToFile(int serverId, String output) {
-		try {
-			// true = append file
-			FileWriter fileWritter = new FileWriter(this.getOutputFileName(),
-					true);
-			BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
-			bufferWritter.write(output);
-			bufferWritter.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void main(String args[]) {
-		GrepRequestDispatcher dispatcher = new GrepRequestDispatcher(args[0],
-				args[1]);
+	public static void main(String args[])
+	{
+		GrepRequestDispatcher dispatcher= new GrepRequestDispatcher(args[0],args[1]);
 		dispatcher.run();
 	}
 }

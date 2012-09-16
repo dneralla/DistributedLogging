@@ -17,9 +17,8 @@ public class DistributedGrepTest {
 	public void testGrepFunction() throws Exception {
 		String outputFileName = "output.txt";
 		String expectedOutcome = "!";
-		GrepRequestDispatcher grepDispatcher = new GrepRequestDispatcher("[!@#$]*","*.log");
+		GrepRequestDispatcher grepDispatcher = new GrepRequestDispatcher("[!@#$]*","*.log", outputFileName);
 		LogRequestDispatcher logDispatcher = new LogRequestDispatcher("InFrequentPattern.log", "!", "src/edu/dsy/mp1/config.xml");
-		grepDispatcher.setOutputFileName(outputFileName);
         logDispatcher.run();
         grepDispatcher.run();
         assertTrue(isFileContentMatching(outputFileName, expectedOutcome));
