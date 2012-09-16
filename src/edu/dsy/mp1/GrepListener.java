@@ -36,6 +36,7 @@ public class GrepListener {
 	Document doc;
 	NodeList nList;
 
+	String fileXML;
 	public GrepListener() {}
 	/**
 	 *
