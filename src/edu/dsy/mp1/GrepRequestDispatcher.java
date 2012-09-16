@@ -1,6 +1,8 @@
 package edu.dsy.mp1;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -23,6 +25,8 @@ public class GrepRequestDispatcher{
 	ObjectInputStream in;
 	String message;
 	GrepInputParameters inputParams;
+	boolean writeOutputToFile;
+	String outputFile;
 
 	DocumentBuilderFactory dbFactory;
 	DocumentBuilder dBuilder;
@@ -39,6 +43,12 @@ public class GrepRequestDispatcher{
 		inputParams = new GrepInputParameters(regex, filePattern,optionalParams);
 	}
 	
+	public GrepRequestDispatcher(String regex, String filePattern,boolean outputToFile,String outputFile)
+	{
+		inputParams = new GrepInputParameters(regex, filePattern);
+		this.writeOutputToFile=outputToFile;
+		this.outputFile=outputFile;
+	}
 
 	private static String getTagValue(String sTag, Element eElement) {
 		NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
@@ -76,8 +86,24 @@ public class GrepRequestDispatcher{
 					// message = (String)in.readObject();
 					// System.out.println("server>" + message);
 					sendMessage(inputParams);
+					
 					message = (String) in.readObject();
-					System.out.println(message);
+					if(!this.writeOutputToFile)
+					{ System.out.println(message); }
+					else
+					{
+						try{
+							  // Create file 
+							  FileWriter fstream = new FileWriter(this.outputFile);
+							  BufferedWriter out = new BufferedWriter(fstream);
+							  out.write("Hello Java");
+							  //Close the output stream
+							  out.close();
+							  }catch (Exception e){//Catch exception if any
+							  System.err.println("Error: " + e.getMessage());
+							  }
+					}
+					
 				} catch (ClassNotFoundException classNot) {
 					System.err.println("data received in unknown format");
 				}
