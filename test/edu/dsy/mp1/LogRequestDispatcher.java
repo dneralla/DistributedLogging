@@ -1,11 +1,8 @@
 package edu.dsy.mp1;
 
-
-//Grep Dispatcher
-
 public class LogRequestDispatcher extends RequestDispatcher {
 
-	LogRequestDispatcher(String fileName, String fileContent, String configFileName) {
-		super(new LogParameters(fileName, fileContent), configFileName);
+	LogRequestDispatcher(String fileName, String pattern, int frequency, String configFileName) {
+		super(new LogParameters(fileName, pattern, frequency), configFileName);
 	}
 }

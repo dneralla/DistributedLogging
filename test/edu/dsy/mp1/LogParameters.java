@@ -1,18 +1,30 @@
 package edu.dsy.mp1;
 
 public class LogParameters extends InputParameters {
-	private String fileContent;
+	private String pattern;
 
-	public LogParameters(String fileName, String fileContent) {
+	public String getPattern() {
+		return pattern;
+	}
+	public void setPattern(String pattern) {
+		this.pattern = pattern;
+	}
+
+	private int frequency;
+
+
+	public int getFrequency() {
+		return frequency;
+	}
+
+	public void setFrequency(int frequency) {
+		this.frequency = frequency;
+	}
+
+	public LogParameters(String fileName, String pattern, int frequency) {
 		super(fileName);
-		this.fileContent = fileContent;
+		this.pattern = pattern;
+		this.frequency = frequency;
 	}
 
-	public String getFileContent() {
-		return fileContent;
-	}
-
-	public void setFileContent(String fileContent) {
-		this.fileContent = fileContent;
-	}
 }
