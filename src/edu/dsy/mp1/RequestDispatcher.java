@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -18,10 +19,8 @@ import org.w3c.dom.NodeList;
 //Generic Request Dispatcher
 
 public abstract class RequestDispatcher{
-	Socket requestSocket;
-	ObjectOutputStream out;
-	ObjectInputStream in;
-	String message;
+	
+	
 	InputParameters inputParams;
 
 	DocumentBuilderFactory dbFactory;
@@ -29,10 +28,12 @@ public abstract class RequestDispatcher{
 	Document doc;
 	NodeList nList;
 	String configFileName;
-
+	
+	StringBuffer output;
 	public RequestDispatcher(InputParameters inputParams, String configFileName) {
 		this.inputParams = inputParams;
 		this.configFileName = configFileName;
+		this.output =new StringBuffer();
 	}
 	public String getConfigFileName() {
 		return configFileName;
@@ -60,11 +61,20 @@ public abstract class RequestDispatcher{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		for (int i = 0; i < nList.getLength(); i++) {
+		for ( int i = 0; i < nList.getLength(); i++) {
+			
+			
+			new DispatchThread(i) {
+				public void run()
+				{
+					Socket requestSocket=null;
+					ObjectOutputStream out=null;
+					ObjectInputStream in = null;
+				
 			try {
-				Element serverConfig = (Element) nList.item(i);
+				Element serverConfig = (Element) nList.item(this.getParam());
 				String hostName = getTagValue("name", serverConfig);
-				String hostPort = getTagValue("port", serverConfig);
+			    String hostPort = getTagValue("port", serverConfig);
 
 				// 1. creating a socket to connect to the server
 				requestSocket = new Socket(hostName, Integer.parseInt(hostPort));
@@ -77,9 +87,10 @@ public abstract class RequestDispatcher{
 				try {
 					// message = (String)in.readObject();
 					// System.out.println("server>" + message);
-				    sendMessage(inputParams);
-					message = (String) in.readObject();
-					System.out.println("server>" + message);
+				    sendMessage(inputParams,out);
+					
+					System.out.println((String) in.readObject());
+					output.append((String) in.readObject());
 				} catch (ClassNotFoundException classNot) {
 					System.err.println("data received in unknown format");
 				}
@@ -94,14 +105,17 @@ public abstract class RequestDispatcher{
 					in.close();
 					out.close();
 					requestSocket.close();
-				} catch (IOException ioException) {
-					ioException.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
+			
+				}
+			}.start();
 		}
 	}
 
-	public void sendMessage(InputParameters params)
+	public void sendMessage(InputParameters params, ObjectOutputStream out)
 	{
 		try{
 			out.writeObject(params);

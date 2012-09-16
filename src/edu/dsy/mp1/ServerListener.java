@@ -25,6 +25,7 @@ public abstract class ServerListener {
 	ObjectOutputStream out;
 	ObjectInputStream in;
 	InputParameters input;
+	
 
 	DocumentBuilderFactory dbFactory;
 	DocumentBuilder dBuilder;
@@ -36,9 +37,7 @@ public abstract class ServerListener {
 		this.fileXML = fileXML;
 	}
 
-	/**
-	 *
-	 */
+	
 	/**
 	 *
 	 */
@@ -104,7 +103,11 @@ public abstract class ServerListener {
 			ioException.printStackTrace();
 		}
 	}
-
+    /**
+     * 
+     * @param input
+     * @throws IOException
+     */
 	public void doAction(InputParameters input) throws IOException {
 		return;
 	}

@@ -19,114 +19,39 @@ import org.w3c.dom.NodeList;
 
 //Grep Dispatcher
 
-public class GrepRequestDispatcher{
-	Socket requestSocket;
-	ObjectOutputStream out;
-	ObjectInputStream in;
-	String message;
-	GrepInputParameters inputParams;
-	boolean writeOutputToFile;
-	String outputFile;
+public class GrepRequestDispatcher extends RequestDispatcher{
+	
+	
 
 	DocumentBuilderFactory dbFactory;
 	DocumentBuilder dBuilder;
 	Document doc;
 	NodeList nList;
 
-	public GrepRequestDispatcher(String regex, String filePattern)
+	public GrepRequestDispatcher(String regex, String filePattern,String configFile)
 	{
-		inputParams = new GrepInputParameters(regex, filePattern);
+	  super(new GrepInputParameters(regex, filePattern),configFile);
+	    
 	}
 
-	public GrepRequestDispatcher(String regex, String filePattern,String optionalParams)
+	public GrepRequestDispatcher(String regex, String filePattern,String optionalParams,String configFile)
+	
 	{
-		inputParams = new GrepInputParameters(regex, filePattern,optionalParams);
+		super(new GrepInputParameters(regex, filePattern,optionalParams),configFile);
 	}
 	
-	public GrepRequestDispatcher(String regex, String filePattern,boolean outputToFile,String outputFile)
+	/*public GrepRequestDispatcher(String regex, String filePattern,boolean outputToFile,String outputFile,String configFile)
 	{
-		inputParams = new GrepInputParameters(regex, filePattern);
+		super(new GrepInputParameters(regex, filePattern),configFile);
 		this.writeOutputToFile=outputToFile;
 		this.outputFile=outputFile;
-	}
+	}*/
 
 
-	private static String getTagValue(String sTag, Element eElement) {
-		NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
-        Node nValue = nlList.item(0);
-		return nValue.getNodeValue();
-	}
+	
+	
 
-	public void run() {
-		File propertiesXML = new File("src/edu/dsy/mp1/config.xml");
-		try {
-			dbFactory = DocumentBuilderFactory.newInstance();
-			dBuilder = dbFactory.newDocumentBuilder();
-			doc = dBuilder.parse(propertiesXML);
-			doc.getDocumentElement().normalize();
-			nList = doc.getElementsByTagName("server");
-			// prop.load(new FileInputStream("config.properties"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		for (int i = 0; i < nList.getLength(); i++) {
-			try {
-				Element serverConfig = (Element) nList.item(i);
-				String hostName = getTagValue("name", serverConfig);
-				String hostPort = getTagValue("port", serverConfig);
-
-				// 1. creating a socket to connect to the server
-				requestSocket = new Socket(hostName, Integer.parseInt(hostPort));
-
-				// 2. get Input and Output streams
-				out = new ObjectOutputStream(requestSocket.getOutputStream());
-				out.flush();
-				in = new ObjectInputStream(requestSocket.getInputStream());
-				// 3: Communicating with the server
-				try {
-					// message = (String)in.readObject();
-					// System.out.println("server>" + message);
-					sendMessage(inputParams);
-					
-					message = (String) in.readObject();
-					if(!this.writeOutputToFile)
-					{ System.out.println(message); }
-					else
-					{
-						try{
-							  // Create file 
-							  FileWriter fstream = new FileWriter(this.outputFile);
-							  BufferedWriter out = new BufferedWriter(fstream);
-							  out.write("Hello Java");
-							  //Close the output stream
-							  out.close();
-							  }catch (Exception e){//Catch exception if any
-							  System.err.println("Error: " + e.getMessage());
-							  }
-					}
-					
-				} catch (ClassNotFoundException classNot) {
-					System.err.println("data received in unknown format");
-				}
-			} catch (UnknownHostException unknownHost) {
-				System.err
-						.println("You are trying to connect to an unknown host!");
-			} catch (IOException ioException) {
-				ioException.printStackTrace();
-			} finally {
-				// 4: Closing connection
-				try {
-					in.close();
-					out.close();
-					requestSocket.close();
-				} catch (IOException ioException) {
-					ioException.printStackTrace();
-				}
-			}
-		}
-	}
-
-	public void sendMessage(GrepInputParameters params)
+	public void sendMessage(GrepInputParameters params,ObjectOutputStream out)
 	{
 		try{
 			out.writeObject(params);
@@ -139,7 +64,8 @@ public class GrepRequestDispatcher{
 
 	public static void main(String args[])
 	{
-		GrepRequestDispatcher dispatcher= new GrepRequestDispatcher(args[0],args[1]);
+		String configFileName="src/edu/dsy/mp1/config.xml";
+		GrepRequestDispatcher dispatcher= new GrepRequestDispatcher(args[0],args[1],configFileName);
 		dispatcher.run();
 	}
 }
