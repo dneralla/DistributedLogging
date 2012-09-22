@@ -1,10 +1,16 @@
 <servers>
- <server>
-  <name>dopemaster-ThinkPad-Edge-E430</name>
-  <port>2065</port>
- </server>
- <server>
-  <name>dopemaster-ThinkPad-Edge-E430</name>
-  <port>2065</port>
- </server>
+	<server>
+		<name>linux5.ews.illinois.edu</name>
+		<port>5077</port>
+	</server>
+
+	<server>
+		<name>linux6.ews.illinois.edu</name>
+		<port>5078</port>
+	</server>
+
+	<server>
+		<name>linux7.ews.illinois.edu</name>
+		<port>5079</port>
+	</server>
 </servers>

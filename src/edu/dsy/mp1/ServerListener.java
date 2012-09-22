@@ -19,33 +19,38 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * 
+ * Base Class for the server.
+ * 
+ */
 public abstract class ServerListener {
 	ServerSocket sSocket;
 	Socket connection = null;
 	ObjectOutputStream out;
 	ObjectInputStream in;
 	InputParameters input;
-	
 
 	DocumentBuilderFactory dbFactory;
 	DocumentBuilder dBuilder;
 	Document doc;
 	NodeList nList;
-    String fileXML;
+	String fileXML;
 
+	/**
+	 * 
+	 * @param fileXML
+	 */
 	public ServerListener(String fileXML) {
 		this.fileXML = fileXML;
 	}
 
-	
 	/**
-	 *
-	 */
-   public void run()
-   {
+ * 
+ */
+	public void run() {
 
-
-		int port=0;
+		int port = 0;
 		File propertiesXML = new File(fileXML);
 		try {
 
@@ -56,43 +61,44 @@ public abstract class ServerListener {
 
 			XPathFactory factory = XPathFactory.newInstance();
 			XPath xpath = factory.newXPath();
-		    XPathExpression expr = xpath.compile("//servers/server[name='"+InetAddress.getLocalHost().getHostName()+"']/port/text()");
+			XPathExpression expr = xpath.compile("//servers/server[name='"
+					+ InetAddress.getLocalHost().getHostName()
+					+ "']/port/text()");
 
 			Object result = expr.evaluate(doc, XPathConstants.NODE);
-			Node n =(Node)result;
-			port=Integer.parseInt(n.getNodeValue());
-		    } catch (Exception e) {
+			Node n = (Node) result;
+			port = Integer.parseInt(n.getNodeValue());
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-	  while(true){
-		try{
-	    sSocket = new ServerSocket(port);
-		connection = sSocket.accept();
-		System.out.println("Connection received from " + connection.getInetAddress().getHostName());
-		out = new ObjectOutputStream(connection.getOutputStream());
-		out.flush();
-		in = new ObjectInputStream(connection.getInputStream());
-		try{
-			  input = (InputParameters)in.readObject();
-			  doAction(input);
+		while (true) {
+			try {
+				sSocket = new ServerSocket(port);
+				connection = sSocket.accept();
+				System.out.println("Connection received from "
+						+ connection.getInetAddress().getHostName());
+				out = new ObjectOutputStream(connection.getOutputStream());
+				out.flush();
+				in = new ObjectInputStream(connection.getInputStream());
+				try {
+					input = (InputParameters) in.readObject();
+					doAction(input);
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				} finally {
+					in.close();
+					out.close();
+					sSocket.close();
+				}
+			} catch (IOException ioException) {
+				ioException.printStackTrace();
 			}
-	    catch(ClassNotFoundException e){
-		    e.printStackTrace();
 		}
-	    finally{
-			in.close();
-			out.close();
-			sSocket.close();
-		}
-	}catch(IOException ioException){
-			ioException.printStackTrace();
-		}
-	}}
-
+	}
 
 	/**
-	 *
+	 * 
 	 * @param msg
 	 */
 	public void sendMessage(String msg) {
@@ -103,11 +109,12 @@ public abstract class ServerListener {
 			ioException.printStackTrace();
 		}
 	}
-    /**
-     * 
-     * @param input
-     * @throws IOException
-     */
+
+	/**
+	 * 
+	 * @param input
+	 * @throws IOException
+	 */
 	public void doAction(InputParameters input) throws IOException {
 		return;
 	}

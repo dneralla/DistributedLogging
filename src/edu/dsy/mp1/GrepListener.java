@@ -4,90 +4,64 @@ import java.io.BufferedReader;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
-import java.net.ServerSocket;
-import java.net.Socket;
+/**
+ * 
+ * Server class which listens for grep requests and  provides results
+ * to the client.
+ *
+ */
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+public class GrepListener extends ServerListener {
 
-
-import org.w3c.dom.Document;
-
-import org.w3c.dom.NodeList;
-
-
-//Grep Listener
-
-public class GrepListener extends ServerListener{
-	ServerSocket sSocket;
-	Socket connection = null;
-	ObjectOutputStream out;
-	ObjectInputStream in;
-	GrepInputParameters input;
-
-	DocumentBuilderFactory dbFactory;
-	DocumentBuilder dBuilder;
-	Document doc;
-	NodeList nList;
-
-   
 	public GrepListener(String fileXML) {
 		super(fileXML);
 	}
 
+	/**
+	 * 
+	 * @param msg
+	 */
+	public void sendMessage(String msg) {
+		try {
+			out.writeObject(msg);
+			out.flush();
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
+		}
+	}
 
-	
-	
-    
-
- /**
-  *
-  * @param msg
-  */
-     public void sendMessage(String msg)
-     {
-	  try{
-		out.writeObject(msg);
-		out.flush();
-	    }
-	  catch(IOException ioException){
-		ioException.printStackTrace();
-	    }
-      }
-/**
- *
- * @param input
- * @throws IOException
- */
-   
-   public void doAction(GrepInputParameters input) throws IOException
-   {
-	    System.out.println(input.getPattern());
-	    System.out.println(input.getFileName());
-        Process p = Runtime.getRuntime().exec("grep"+" "+input.getPattern()+" "+input.getFileName()+ " "+input.getOptionalParams() );
-		BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
-		String buffer,result="";
+	/**
+	 * Method that does the Grep and sends result to the requested client
+	 * @param input
+	 * @throws IOException
+	 */
+	@Override
+	public void doAction(InputParameters input) throws IOException {
+		Process p = Runtime.getRuntime().exec(
+				"grep" + " " + ((GrepInputParameters) input).getPattern() + " "
+						+ ((GrepInputParameters) input).getFileName() + " "
+						+ ((GrepInputParameters) input).getOptionalParams());
+		BufferedReader stdInput = new BufferedReader(new InputStreamReader(
+				p.getInputStream()));
+		String buffer, result = "";
 		while ((buffer = stdInput.readLine()) != null) {
-		result = result + buffer;
+			result = result + buffer;
 		}
 		sendMessage(result);
 
-   }
+	}
 
-  /**
-   *
-   * @param args
-   */
-  public static void main(String args[])
- 	{
-    	System.out.println("hello");
-    	String fileXML= "src/edu/dsy/mp1/config.xml";
- 		GrepListener server = new GrepListener(fileXML);
+	/**
+	 * 
+	 * @param args
+	 */
+	public static void main(String args[]) {
+		System.out.println("hello");
+		String fileXML = "src/edu/dsy/mp1/config.xml";
+		GrepListener server = new GrepListener(fileXML);
 
- 			server.run();
+		server.run();
 
- 	}
+	}
 }
